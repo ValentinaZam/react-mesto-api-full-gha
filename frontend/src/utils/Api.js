@@ -130,9 +130,4 @@ class Api {
 
 export const api = new Api({
   url: "https://api.project-Mesto-deploy.nomoredomains.xyz",
-  // "https://mesto.nomoreparties.co/v1/cohort-64",
-  // headers: {
-  //   authorization: "b75175b4-0180-44ef-beaa-a76ffe56ff1c",
-  //   "content-type": "application/json"
-  // }
 })

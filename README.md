@@ -9,8 +9,8 @@
 
 ## Ссылки на проект
 
-IP-адрес x.x.x.x
+IP-адрес 158.160.97.75
 
-Frontend https://...
+Frontend https://project-Mesto-deploy.nomoredomains.xyz
 
-Backend https://...
+Backend https://api.project-Mesto-deploy.nomoredomains.xyz
