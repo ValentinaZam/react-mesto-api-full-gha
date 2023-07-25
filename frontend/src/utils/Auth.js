@@ -1,4 +1,4 @@
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "project-Mesto-deploy.nomoredomains.xyz";
 //"https://auth.nomoreparties.co"
 
 const checkResponse = (res) => {
