@@ -53,6 +53,7 @@ function App() {
       .then((user) => {
         setIsInfoTooltipOpen(true)
         setIsSuccessInfoTooltipState(true)
+        console.log(user.email)
         handleLogin(user.email)
         navigate("/sign-in")
       })
