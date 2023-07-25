@@ -1,0 +1,5 @@
+.element__mesto {
+  padding: 22px 15px 10px 20px;
+  display: flex;
+  justify-content: space-between;
+}

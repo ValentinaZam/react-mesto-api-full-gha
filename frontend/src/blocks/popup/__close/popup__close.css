@@ -1,0 +1,26 @@
+.popup__close {
+    padding: 0;
+    border: none;
+    position: absolute;
+    background-image: url(../../../images/button/close-icon.svg);
+    width: 32px;
+    height: 32px;
+    margin-top: -72px;
+    margin-left: 404px;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+}
+
+.popup__close:hover {
+    opacity: .6;
+}
+
+@media screen and (max-width: 700px) {
+    .popup__close {
+        margin-top: -60px;
+        margin-left: 240px;
+        width: 20px;
+        height: 20px;
+        background-size:cover;
+    }
+}

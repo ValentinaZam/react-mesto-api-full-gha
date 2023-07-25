@@ -1,0 +1,7 @@
+.tooltip {
+  margin: 26px auto;
+  display: block;
+  text-align: center;
+  max-height: 258px;
+  max-width: 359px;
+}

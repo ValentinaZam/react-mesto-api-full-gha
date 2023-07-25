@@ -1,0 +1,18 @@
+.profile {
+    display: flex;
+    margin: 40px auto 0;
+    max-width: 880px;
+    /* min-height: 120px; ревью */
+}
+
+@media screen and (max-width: 750px) {
+    .profile {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 920px) {
+    .profile {
+        margin: 42px 19px 0;
+    }
+}
