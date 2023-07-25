@@ -1,4 +1,4 @@
-export const BASE_URL = "project-Mesto-deploy.nomoredomains.xyz";
+export const BASE_URL = "api.project-Mesto-deploy.nomoredomains.xyz";
 //"https://auth.nomoreparties.co"
 
 const checkResponse = (res) => {
