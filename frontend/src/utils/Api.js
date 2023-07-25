@@ -12,39 +12,24 @@ class Api {
   }
 
   getUserInfo() {
-    const token = localStorage.getItem("token");
+    this.headers.authorization = `Bearer ${localStorage.getItem("token")}`
     return fetch(this._url + "/users/me", {
       method: "GET",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      }
-      // this._headers
+      headers: this._headers
     }).then((res) => this._checkResponse(res))
   }
 
   getInitialCards() {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/cards", {
       method: "GET",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      }
+      headers: this._headers
     }).then((res) => this._checkResponse(res))
   }
 
   setUserInfo(data) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/users/me", {
       method: "PATCH",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      },
+      headers: this._headers,
       body: JSON.stringify({
         name: data.name,
         about: data.about
@@ -53,14 +38,9 @@ class Api {
   }
 
   setUserAvatar(link) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/users/me/avatar", {
       method: "PATCH",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      },
+      headers: this._headers,
       body: JSON.stringify({
         avatar: link.avatar
       })
@@ -68,14 +48,9 @@ class Api {
   }
 
   addCard(data) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/cards", {
       method: "POST",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      },
+      headers: this._headers,
       body: JSON.stringify({
         name: data.name,
         link: data.link
@@ -84,26 +59,16 @@ class Api {
   }
 
   deleteCards(cardId) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/cards/" + cardId, {
       method: "DELETE",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      }
+      headers: this._headers
     }).then((res) => this._checkResponse(res))
   }
 
   deleteLike(cardId) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/cards/" + cardId + "/likes", {
       method: "DELETE",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      }
+      headers: this._headers
     }).then((res) => this._checkResponse(res))
   }
 
@@ -116,18 +81,17 @@ class Api {
   }
 
   addLike(cardId) {
-    const token = localStorage.getItem("token");
     return fetch(this._url + "/cards/" + cardId + "/likes", {
       method: "PUT",
-      headers:
-      {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json"
-      }
+      headers: this._headers
     }).then((res) => this._checkResponse(res))
   }
 }
 
 export const api = new Api({
   url: "https://api.project-Mesto-deploy.nomoredomains.xyz",
+  headers: {
+    authorization: `Bearer ${localStorage.getItem("token")}`,
+    "content-type": "application/json"
+  }
 })
