@@ -38,9 +38,12 @@ function App() {
     auth
       .authorize(userInfo)
       .then((data) => {
+        console.log(data)
         if (data.token) {
+          console.log(data.token)
           localStorage.setItem("token", data.token)
           handleLogin(userInfo.email)
+          window.location.reload();
           navigate("/")
         }
       })
@@ -53,7 +56,6 @@ function App() {
       .then((user) => {
         setIsInfoTooltipOpen(true)
         setIsSuccessInfoTooltipState(true)
-        console.log(user.email)
         handleLogin(user.email)
         navigate("/sign-in")
       })
@@ -64,6 +66,8 @@ function App() {
       })
   }
   const signOut = () => {
+    setLoggedIn(false)
+    //&&&&&&&&
     localStorage.removeItem("token")
     setEmail("")
     navigate("/sign-up")
@@ -83,10 +87,6 @@ function App() {
   }
 
   useEffect(() => {
-    checkToken()
-  }, [])
-
-  useEffect(() => {
     if (loggedIn) {
       api
         .getInitialCards()
@@ -94,6 +94,19 @@ function App() {
         .catch((err) => console.log(`Ошибка ${err}`))
     }
   }, [loggedIn])
+
+  useEffect(() => {
+    if (loggedIn) {
+      api
+        .getUserInfo()
+        .then((email) => setCurrentUser(email))
+        .catch((err) => console.log(`Ошибка ${err}`))
+    }
+  }, [loggedIn])
+
+  useEffect(() => {
+    checkToken()
+  }, [])
 
   function closeAllPopups() {
     const allPopupStateSetters = [
@@ -135,15 +148,6 @@ function App() {
       })
       .catch((err) => console.log(`Ошибка ${err}`))
   }
-
-  useEffect(() => {
-    if (loggedIn) {
-      api
-        .getUserInfo()
-        .then((email) => setCurrentUser(email))
-        .catch((err) => console.log(`Ошибка ${err}`))
-    }
-  }, [loggedIn])
 
   function handleCardLike(card) {
     const isLiked = card.likes.some((i) => i === currentUser._id)

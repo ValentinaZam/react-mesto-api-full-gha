@@ -12,10 +12,13 @@ class Api {
   }
 
   getUserInfo() {
-    this.headers.authorization = `Bearer ${localStorage.getItem("token")}`
+    //const token = `Bearer ${localStorage.getItem("token")}`
     return fetch(this._url + "/users/me", {
       method: "GET",
-      headers: this._headers
+      headers: {
+        authorization: `Bearer ${localStorage.getItem("token")}`,
+        "content-type": "application/json"
+      }
     }).then((res) => this._checkResponse(res))
   }
 
