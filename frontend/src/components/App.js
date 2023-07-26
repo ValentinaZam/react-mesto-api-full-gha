@@ -38,13 +38,13 @@ function App() {
     auth
       .authorize(userInfo)
       .then((data) => {
-        console.log(data)
         if (data.token) {
-          console.log(data.token)
           localStorage.setItem("token", data.token)
           handleLogin(userInfo.email)
-          window.location.reload();
+
           navigate("/")
+          // eslint-disable-next-line no-restricted-globals
+          location.reload();
         }
       })
       .catch((err) => console.log(`Ошибка: ${err}`))
