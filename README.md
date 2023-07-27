@@ -9,7 +9,7 @@
 
 ## Ссылки на проект
 
-IP 158.160.97.75
+IP 158.160.111.144
 
 Frontend https://project-Mesto-deploy.nomoredomains.xyz
 
