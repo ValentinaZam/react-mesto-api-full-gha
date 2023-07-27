@@ -40,8 +40,7 @@ function App() {
       .then((data) => {
         if (data.token) {
           localStorage.setItem("token", data.token)
-          handleLogin(userInfo.email)
-
+          //handleLogin(userInfo.email)
           navigate("/")
           // eslint-disable-next-line no-restricted-globals
           location.reload();
