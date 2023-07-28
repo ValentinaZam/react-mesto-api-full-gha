@@ -13,9 +13,9 @@ export const register = (data) => {
   return fetch(`${BASE_URL}/signup`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      mode: "cors"
+      "Content-Type": "application/json"
     },
+    mode: "cors",
     body: JSON.stringify({
       email: data.email,
       password: data.password
@@ -27,9 +27,9 @@ export const authorize = (userInfo) => {
   return fetch(`${BASE_URL}/signin`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      mode: "cors"
+      "Content-Type": "application/json"
     },
+    mode: "cors",
     body: JSON.stringify({
       email: userInfo.email,
       password: userInfo.password
