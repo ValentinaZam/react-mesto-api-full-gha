@@ -13,7 +13,7 @@ import Login from "./Login"
 import Register from "./Register"
 import { ProtectedRoute } from "./ProtectedRoute"
 import InfoTooltip from "./InfoTooltip"
-import * as auth from "../utils/Auth"
+import auth from "../utils/Auth"
 import Footer from "./Footer"
 
 function App() {
