@@ -1,11 +1,12 @@
 export const BASE_URL = "https://api.project-Mesto-deploy.nomoredomains.xyz";
 //"https://auth.nomoreparties.co"
+//export const BASE_URL = "http://localhost:3000";
 
 const checkResponse = (res) => {
   if (res.ok) {
     return res.json()
   }
-  return Promise.reject(`Ошибка: ${res.status}`)
+  return Promise.reject(`Ошибка: ${res}`)
 }
 
 export const register = (data) => {
@@ -21,27 +22,36 @@ export const register = (data) => {
   }).then((res) => checkResponse(res))
 }
 
-export const authorize = (data) => {
+export const authorize = (userInfo) => {
   return fetch(`${BASE_URL}/signin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      email: data.email,
-      password: data.password
+      email: userInfo.email,
+      password: userInfo.password
     })
   }).then((res) => checkResponse(res))
-  // .catch()
+    .then((data) => {
+
+      if (data.token) {
+        console.log(data.token)
+        localStorage.setItem("token", data.token);
+        return data;
+      }
+    })
+  //.then((res) => checkResponse(res))
 }
 
-export const checkToken = () => {
-  const token = localStorage.getItem("token");
+export const checkToken = (token) => {
+  console.log(token)
+  //token = localStorage.getItem("token");
   return fetch(`${BASE_URL}/users/me`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      authorization: `Bearer ${token}`
     }
   }).then((res) => checkResponse(res))
 }

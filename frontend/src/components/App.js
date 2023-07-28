@@ -35,27 +35,27 @@ function App() {
   }
 
   const handleLoginSubmit = (userInfo) => {
+    console.log(userInfo)
     auth
       .authorize(userInfo)
-      .then((data) => {
-        if (data.token) {
-          localStorage.setItem("token", data.token)
-          //handleLogin(userInfo.email)
-          navigate("/")
-          // eslint-disable-next-line no-restricted-globals
-          location.reload();
-        }
+      .then(() => {
+        setLoggedIn(true)
+        handleLogin(userInfo.email)
+        navigate("/", { replace: true })
       })
-      .catch((err) => console.log(`Ошибка: ${err}`))
+      .catch((err) => {
+        console.error()
+        setIsInfoTooltipOpen(true)
+        setIsSuccessInfoTooltipState(false)
+      })
   }
 
   const handleRegistrationSubmit = (data) => {
     auth
       .register(data)
-      .then((user) => {
+      .then(() => {
         setIsInfoTooltipOpen(true)
         setIsSuccessInfoTooltipState(true)
-        handleLogin(user.email)
         navigate("/sign-in")
       })
       .catch((err) => {
@@ -64,32 +64,19 @@ function App() {
         setIsSuccessInfoTooltipState(false)
       })
   }
+
   const signOut = () => {
     setLoggedIn(false)
-    //&&&&&&&&
     localStorage.removeItem("token")
     setEmail("")
     navigate("/sign-up")
-  }
-
-  const checkToken = () => {
-    const tokenUser = localStorage.getItem("token")
-    if (tokenUser) {
-      auth
-        .checkToken(tokenUser)
-        .then((user) => {
-          handleLogin(user.email)
-          navigate("/")
-        })
-        .catch((err) => console.log(`Ошибка: ${err}`))
-    }
   }
 
   useEffect(() => {
     if (loggedIn) {
       api
         .getInitialCards()
-        .then((cards) => setCards(cards.reverse()))
+        .then((cards) => setCards(cards.data.reverse()))
         .catch((err) => console.log(`Ошибка ${err}`))
     }
   }, [loggedIn])
@@ -104,8 +91,19 @@ function App() {
   }, [loggedIn])
 
   useEffect(() => {
-    checkToken()
-  }, [])
+    const tokenUser = localStorage.getItem("token")
+    if (tokenUser) {
+      console.log(tokenUser)
+      auth
+        .checkToken(tokenUser)
+        .then((user) => {
+
+          handleLogin(user.email)
+          navigate("/", { replace: true })
+        })
+        .catch((err) => console.log(`Ошибка: ${err}`))
+    }
+  }, [loggedIn])
 
   function closeAllPopups() {
     const allPopupStateSetters = [
@@ -122,7 +120,7 @@ function App() {
     api
       .addCard(data)
       .then((newCard) => {
-        setCards([newCard, ...cards])
+        setCards([newCard.data, ...cards])
         closeAllPopups()
       })
       .catch((err) => console.log(`Ошибка ${err}`))
@@ -148,16 +146,6 @@ function App() {
       .catch((err) => console.log(`Ошибка ${err}`))
   }
 
-  function handleCardLike(card) {
-    const isLiked = card.likes.some((i) => i === currentUser._id)
-    api
-      .changeLikeCardStatus(card._id, !isLiked)
-      .then((newCard) => {
-        setCards((state) => state.map((c) => (c._id === card._id ? newCard : c)))
-      })
-      .catch((err) => console.log(`Ошибка ${err}`))
-  }
-
   function handleCardDelete(id) {
     api
       .deleteCards(id)
@@ -165,6 +153,17 @@ function App() {
         setCards((state) => state.filter((card) => card._id !== id))
       })
       .catch((err) => console.log(`Ошибка ${err}`))
+  }
+
+  function handleCardLike(card) {
+    const isLiked = card.likes.some((user) => user === currentUser._id);
+    (isLiked ? api.deleteLike(card._id) : api.addLike(card._id, true))
+      .then((newCard) => {
+        setCards((state) =>
+          state.map((c) => (c._id === newCard.data._id ? newCard.data : c))
+        );
+      })
+      .catch((err) => console.log(err));
   }
 
   const handleEditAvatarClick = () => {

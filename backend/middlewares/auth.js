@@ -1,32 +1,28 @@
-const jwt = require("jsonwebtoken");
-const AuthError = require("../errors/AuthError");
+const jwt = require('jsonwebtoken');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { SECRET_SIGNING_KEY } = require('../utils/constants');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
-const handleAuthError = () => {
-  throw new AuthError("Необходима авторизация");
-  // res.status(401).send({ message: "Необходима авторизация" });
-};
-
-// eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
+  const bearer = 'Bearer ';
+  const errorMsg = 'Неправильные почта или пароль';
 
-  if (!authorization || !authorization.startsWith("Bearer ")) {
-    return handleAuthError(res);
+  if (!authorization || !authorization.startsWith(bearer)) {
+    return next(new UnauthorizedError(`${errorMsg}(${authorization})!`));
   }
 
-  const token = authorization.replace("Bearer ", "");
+  const token = authorization.replace(bearer, '');
 
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === "production" ? JWT_SECRET : "super-strong-secret");
+    payload = jwt.verify(token, SECRET_SIGNING_KEY);
   } catch (err) {
-    return handleAuthError(res);
+    return next(new UnauthorizedError(`${errorMsg}!`));
   }
 
   req.user = payload;
 
-  next();
+  return next();
 };

@@ -1,157 +1,199 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const ConflictError = require("../errors/ConflictError");
-const BadRequest = require("../errors/BadRequest");
-const AuthError = require("../errors/AuthError");
-const NotFound = require("../errors/NotFound");
+require('dotenv').config();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, SECRET_SIGNING_KEY } = require('../utils/constants');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+const NotFoundError = require('../errors/NotFoundError');
+const ConflictError = require('../errors/ConflictError');
+const User = require('../models/user');
+const InaccurateDataError = require('../errors/InaccurateDataError');
 
-const User = require("../models/user");
+// регистрация пользователя
+function registrationUser(req, res, next) {
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
 
-const createUser = (req, res, next) => {
-  const { email, password, name, avatar, about } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, about, email, password: hash }))
-    .then(() => res.status(201).send({ name, about, avatar, email }))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(
-          new BadRequest(
-            "Переданы некорректные данные при создании пользователя."
-          )
-        );
-      } if (err.code === 11000) {
-        return next(
-          new ConflictError(`Пользователь с email '${email}' уже существует.`)
-        );
-      } return next(err);
-    });
-};
-
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      res.send(users);
-    })
-    .catch((err) => next(err));
-};
-
-const getUser = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
+    }))
     .then((user) => {
-      if (user) {
-        res.send(user);
+      const { _id } = user;
+
+      return res.status(201).send({
+        email,
+        name,
+        about,
+        avatar,
+        _id,
+      });
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(
+          new ConflictError(
+            'Пользователь с таким электронным адресом уже зарегистрирован',
+          ),
+        );
+      } else if (err.name === 'ValidationError') {
+        next(
+          new InaccurateDataError(
+            'Переданы некорректные данные при регистрации пользователя',
+          ),
+        );
       } else {
-        return next(new NotFound("Пользователь по указанному id не найден."));
+        next(err);
       }
+    });
+}
+
+// логин пользователя
+function loginUser(req, res, next) {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then(({ _id: userId }) => {
+      if (userId) {
+        const token = jwt.sign(
+          { userId },
+          NODE_ENV === 'production' ? SECRET_SIGNING_KEY : 'dev-secret',
+          { expiresIn: '7d' },
+        );
+
+        return res.send({ token });
+      }
+
+      throw new UnauthorizedError('Неправильные почта или пароль');
+    })
+    .catch(next);
+}
+
+// пользователи:
+function getUsers(_, res, next) {
+  User.find({})
+    .then((users) => res.send({ users }))
+    .catch(next);
+}
+
+// конкретный пользователь по его ID:
+function getUserId(req, res, next) {
+  const { id } = req.params;
+
+  User.findById(id)
+
+    .then((user) => {
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return next(
-          new BadRequest(
-            "Переданы некорректные данные при запросе id пользователя"
-          )
-        );
+      if (err.name === 'CastError') {
+        next(new InaccurateDataError('Передан некорректный id'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
-};
+}
 
-const getCurrentUser = (req, res, next) => {
-  const userId = req.user._id;
+// поиск пользователя:
+function getCurrentUserInfo(req, res, next) {
+  const { userId } = req.user;
+
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        return next(new NotFound("Пользователь по указанному id не найден."));
-      }
-      return res.send(user);
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return next(
-          new BadRequest(
-            "Переданы некорректные данные при запросе id пользователя"
-          )
-        );
+      if (err.name === 'CastError') {
+        next(new InaccurateDataError('Передан некорректный id'));
+      } else {
+        next(err);
       }
-      return next(err);
     });
-};
+}
 
-const updateProfileUser = (req, res, next) => {
-  const userId = req.user._id;
+// редактирование данных пользователя
+function editProfileUserInfo(req, res, next) {
   const { name, about } = req.body;
+  const { userId } = req.user;
+
   User.findByIdAndUpdate(
     userId,
-    { name, about },
-    { new: true, runValidators: true }
+    {
+      name,
+      about,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
     .then((user) => {
-      if (!user) {
-        return next(new NotFound("Указанный id не найден."));
-      }
-      return res.send(user);
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(
-          new BadRequest("Переданы некорректные данные при обновлении профиля.")
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new InaccurateDataError(
+            'Переданы некорректные данные при обновлении профиля',
+          ),
         );
+      } else {
+        next(err);
       }
-      if (err.name === "CastError") {
-        next(new BadRequest("Переданные некорректные данные id."));
-      }
-      return next(err);
     });
-};
+}
 
-const updateAvatarUser = (req, res, next) => {
-  const userId = req.user._id;
+// Редактирование аватара пользователя:
+function updateProfileUserAvatar(req, res, next) {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(userId, { avatar }, { new: true })
+  const { userId } = req.user;
+
+  User.findByIdAndUpdate(
+    userId,
+    {
+      avatar,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .then((user) => {
-      if (!user) {
-        return next(new NotFound("Указанный id не найден."));
-      }
-      return res.send(user);
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(
-          new BadRequest("Переданы некорректные данные при обновлении аватара.")
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new InaccurateDataError(
+            'Переданы некорректные данные при обновлении профиля пользователя',
+          ),
         );
+      } else {
+        next(err);
       }
-      if (err.name === "CastError") {
-        return next(new BadRequest("Переданные не корректные данные id."));
-      }
-      return next(err);
     });
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : "super-strong-secret", {
-        expiresIn: "7d",
-      });
-      res.send({
-        message: "Всё верно!",
-        token,
-      });
-    })
-    .catch(() => next(new AuthError("Не верный логин или пароль.")));
-};
+}
 
 module.exports = {
-  createUser,
+  registrationUser,
+  loginUser,
   getUsers,
-  getUser,
-  updateProfileUser,
-  updateAvatarUser,
-  login,
-  getCurrentUser,
+  getUserId,
+  getCurrentUserInfo,
+  editProfileUserInfo,
+  updateProfileUserAvatar,
 };
