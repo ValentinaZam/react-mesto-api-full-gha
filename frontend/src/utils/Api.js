@@ -103,6 +103,6 @@ class Api {
 }
 
 export const api = new Api({
-  //url: "https://api.project-Mesto-deploy.nomoredomains.xyz",
-  url: "http://localhost:3000"
+  url: "https://api.project-Mesto-deploy.nomoredomains.xyz",
+  //url: "http://localhost:3000"
 })
