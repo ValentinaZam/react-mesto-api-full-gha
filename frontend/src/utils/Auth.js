@@ -1,6 +1,6 @@
-//export const BASE_URL = "https://api.project-Mesto-deploy.nomoredomains.xyz";
+export const BASE_URL = "https://api.project-mesto-deploy.nomoredomains.xyz";
 //"https://auth.nomoreparties.co"
-export const BASE_URL = "http://localhost:3000";
+//export const BASE_URL = "http://localhost:3000";
 
 const checkResponse = (res) => {
   if (res.ok) {
