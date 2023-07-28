@@ -18,6 +18,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "homepage": "https://project-Mesto-deploy.nomoredomains.xyz",
   "eslintConfig": {
     "extends": [
       "react-app",
